@@ -4,17 +4,12 @@
   become: true
 
   tasks:
-    - name: Install Node.js and npm
+    - name: Install Node.js, npm, and Supervisor
       ansible.builtin.apt:
         name:
           - nodejs
           - npm
-        state: present
-        update_cache: true
-        cache_valid_time: 3600
-    - name: Install Supervisor
-      ansible.builtin.apt:
-        name: supervisor
+          - supervisor
         state: present
         update_cache: true
         cache_valid_time: 3600
@@ -57,41 +52,36 @@
           stopsignal=TERM
           stdout_logfile=/var/log/myapp.log
           stderr_logfile=/var/log/myapp-error.log
+      register: supervisor_app_config
 
-    - name: Check whether Supervisor is running
-      ansible.builtin.command: pgrep -x supervisord
-      register: supervisord_process
-      changed_when: false
-      failed_when: false
-
-    - name: Start Supervisor when needed
-      ansible.builtin.command: /usr/bin/supervisord -c /etc/supervisor/supervisord.conf
-      when: supervisord_process.rc != 0
+    - name: Ensure Supervisor service is running
+      ansible.builtin.service:
+        name: supervisor
+        state: started
+        enabled: true
 
     - name: Reread Supervisor configuration
       ansible.builtin.command: supervisorctl reread
       register: supervisor_reread
       changed_when: "'available' in supervisor_reread.stdout or 'changed' in supervisor_reread.stdout"
+      # noqa: command-instead-of-module
 
-    - name: Apply Supervisor configuration
+    - name: Apply Supervisor configuration changes
       ansible.builtin.command: supervisorctl update
       register: supervisor_update
       changed_when: "'added process group' in supervisor_update.stdout or 'restarted' in supervisor_update.stdout or 'removed process group' in supervisor_update.stdout"
+      # noqa: command-instead-of-module
 
-    - name: Check application status
-      ansible.builtin.command: supervisorctl status myapp
-      register: app_status
-      changed_when: false
-      failed_when: false
+    - name: Ensure application is started
+      community.general.supervisorctl:
+        name: myapp
+        state: started
 
-    - name: Start application if stopped
-      ansible.builtin.command: supervisorctl start myapp
-      when: app_status.rc != 0 or 'STOPPED' in app_status.stdout or 'EXITED' in app_status.stdout or 'FATAL' in app_status.stdout
-
-    - name: Wait until application is running
+    - name: Verify application is running
       ansible.builtin.command: supervisorctl status myapp
       register: app_status
       changed_when: false
       retries: 5
       delay: 2
       until: "'RUNNING' in app_status.stdout"
+      # noqa: command-instead-of-module
