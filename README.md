@@ -103,3 +103,18 @@ This is a local learning environment, not a production deployment.
 
 Linux administration, Docker networking, SSH, Ansible automation, YAML, application deployment, process supervision, Nginx reverse proxy, troubleshooting, and service validation.
 
+## Project Validation & Evidence
+
+The project was validated using Ansible, Ansible Lint, and GitHub Actions.
+
+### Validation Results
+- GitHub Actions CI workflow passed.
+- Ansible Lint passed with the production profile.
+- Ansible connectivity verified for all three managed containers.
+- Both Node.js applications returned successful HTTP responses.
+- Nginx configuration validation passed.
+- Nginx reverse proxy successfully routed requests to both application servers.
+
+### Screenshots
+
+See the [`screenshots` folder](screenshots/) for evidence of the CI pipeline, Ansible connectivity, application responses, and Nginx reverse proxy tests.
