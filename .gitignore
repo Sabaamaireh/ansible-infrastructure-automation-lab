@@ -1,0 +1,24 @@
+# SSH private keys
+*.pem
+id_rsa
+id_ed25519
+ansible_lab
+
+# Ansible temporary files
+*.retry
+*.log
+
+# Python cache
+__pycache__/
+*.pyc
+
+# Environment variables and secrets
+.env
+.env.*
+
+# Local editor and OS files
+.vscode/
+.idea/
+.DS_Store
+
+authorized_keys

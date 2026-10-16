@@ -1,0 +1,28 @@
+
+---
+- name: Install Node.js on application servers
+  hosts: app_servers
+  become: true
+
+  tasks:
+    - name: Update apt package cache
+      ansible.builtin.apt:
+        update_cache: true
+        cache_valid_time: 3600
+
+    - name: Install Node.js and npm
+      ansible.builtin.apt:
+        name:
+          - nodejs
+          - npm
+        state: present
+
+    - name: Verify Node.js installation
+      ansible.builtin.command: node --version
+      register: node_version
+      changed_when: false
+
+    - name: Display Node.js version
+      ansible.builtin.debug:
+        msg: "Installed Node.js version: {{ node_version.stdout }}"
+

@@ -1,0 +1,33 @@
+
+---
+- name: Deploy Node.js applications
+  hosts: app_servers
+  become: true
+
+  tasks:
+    - name: Create application directory
+      ansible.builtin.file:
+        path: /opt/myapp
+        state: directory
+        mode: '0755'
+
+    - name: Copy application files
+      ansible.builtin.copy:
+        src: "files/{{ 'appserver1' if inventory_hostname == 'app-server1' else 'appserver2' }}/"
+        dest: /opt/myapp/
+        mode: '0644'
+
+    - name: Install application dependencies
+      community.general.npm:
+        path: /opt/myapp
+        state: present
+
+    - name: Start application in background
+      ansible.builtin.shell: |
+        if [ -f /opt/myapp/app.pid ] && kill -0 "$(cat /opt/myapp/app.pid)" 2>/dev/null; then
+          kill "$(cat /opt/myapp/app.pid)"
+        fi
+        nohup node /opt/myapp/index.js > /opt/myapp/app.log 2>&1 &
+        echo $! > /opt/myapp/app.pid
+      args:
+        executable: /bin/bash

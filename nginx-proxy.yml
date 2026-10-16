@@ -1,0 +1,87 @@
+---
+- name: Configure Nginx reverse proxy
+  hosts: nginx_servers
+  become: true
+
+  tasks:
+    - name: Install Nginx and curl
+      ansible.builtin.apt:
+        name:
+          - nginx
+          - curl
+        state: present
+        update_cache: true
+        cache_valid_time: 3600
+
+    - name: Remove default Nginx site
+      ansible.builtin.file:
+        path: /etc/nginx/sites-enabled/default
+        state: absent
+
+    - name: Configure reverse proxy
+      ansible.builtin.copy:
+        dest: /etc/nginx/sites-available/ansible-lab
+        owner: root
+        group: root
+        mode: '0644'
+        content: |
+          server {
+              listen 80 default_server;
+              server_name _;
+
+              location /ansible {
+                  proxy_pass http://app-server1:3000;
+                  proxy_set_header Host $host;
+                  proxy_set_header X-Real-IP $remote_addr;
+                  proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+              }
+
+              location /puppet {
+                  proxy_pass http://app-server2:3000;
+                  proxy_set_header Host $host;
+                  proxy_set_header X-Real-IP $remote_addr;
+                  proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+              }
+
+              location /health {
+                  default_type text/plain;
+                  return 200 "Nginx reverse proxy is healthy\n";
+              }
+          }
+      register: nginx_config
+
+    - name: Enable reverse proxy site
+      ansible.builtin.file:
+        src: /etc/nginx/sites-available/ansible-lab
+        dest: /etc/nginx/sites-enabled/ansible-lab
+        state: link
+
+    - name: Validate Nginx configuration
+      ansible.builtin.command: nginx -t
+      changed_when: false
+
+    - name: Check whether Nginx is running
+      ansible.builtin.command: pgrep -x nginx
+      register: nginx_process
+      changed_when: false
+      failed_when: false
+
+    - name: Start Nginx when needed
+      ansible.builtin.command: nginx
+      when: nginx_process.rc != 0
+
+    - name: Reload Nginx when configuration changes
+      ansible.builtin.command: nginx -s reload
+      when:
+        - nginx_process.rc == 0
+        - nginx_config.changed
+
+    - name: Verify Nginx health endpoint
+      ansible.builtin.uri:
+        url: http://127.0.0.1/health
+        status_code: 200
+        return_content: true
+      register: nginx_health
+      retries: 5
+      delay: 2
+      until: nginx_health.status == 200
