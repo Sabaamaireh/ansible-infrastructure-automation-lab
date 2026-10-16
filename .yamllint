@@ -1,0 +1,14 @@
+---
+extends: default
+
+rules:
+  line-length:
+    max: 180
+    level: warning
+  truthy:
+    allowed-values: ['true', 'false', 'on']
+    check-keys: false
+  document-start:
+    present: true
+  empty-lines:
+    max: 1

@@ -1,3 +1,4 @@
+---
 name: Ansible Infrastructure CI
 
 on:
@@ -34,7 +35,6 @@ jobs:
 
       - name: Check YAML formatting
         run: yamllint -s .github/workflows/ansible-ci.yml setup.yml deploy-supervisor.yml nginx-proxy.yml
-
       - name: Check setup playbook syntax
         run: ansible-playbook --syntax-check setup.yml
 

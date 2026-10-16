@@ -1,4 +1,3 @@
-
 ---
 - name: Install Node.js on application servers
   hosts: app_servers
@@ -25,4 +24,3 @@
     - name: Display Node.js version
       ansible.builtin.debug:
         msg: "Installed Node.js version: {{ node_version.stdout }}"
-
