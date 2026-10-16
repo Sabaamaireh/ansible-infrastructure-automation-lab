@@ -1,0 +1,48 @@
+name: Ansible Infrastructure CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    name: Validate Ansible Playbooks
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install Ansible and lint tools
+        run: |
+          python -m pip install --upgrade pip
+          pip install ansible-core ansible-lint yamllint
+
+      - name: Install required Ansible collection
+        run: ansible-galaxy collection install community.general
+
+      - name: Check YAML formatting
+        run: yamllint -s .github/workflows/ansible-ci.yml setup.yml deploy-supervisor.yml nginx-proxy.yml
+
+      - name: Check setup playbook syntax
+        run: ansible-playbook --syntax-check setup.yml
+
+      - name: Check application deployment syntax
+        run: ansible-playbook --syntax-check deploy-supervisor.yml
+
+      - name: Check Nginx configuration playbook syntax
+        run: ansible-playbook --syntax-check nginx-proxy.yml
+
+      - name: Run Ansible Lint
+        run: ansible-lint setup.yml deploy-supervisor.yml nginx-proxy.yml
