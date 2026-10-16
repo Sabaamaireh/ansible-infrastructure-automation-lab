@@ -117,4 +117,18 @@ The project was validated using Ansible, Ansible Lint, and GitHub Actions.
 
 ### Screenshots
 
-See the [`screenshots` folder](screenshots/) for evidence of the CI pipeline, Ansible connectivity, application responses, and Nginx reverse proxy tests.
+#### 1. Project Overview
+![Project overview](screenshots/screenshots/project%201.png)
+
+#### 2. Ansible Lint
+![Ansible Lint](screenshots/screenshots/02-ansible-lint-success.png)
+
+#### 3. Ansible Connectivity
+![Ansible connectivity](screenshots/screenshots/Ansible%20connectivity.png-03.png)
+
+#### 4. Application Server Tests
+![Application tests](screenshots/screenshots/app%20server%20success.png)
+
+#### 5. Nginx Reverse Proxy
+![Nginx reverse proxy](screenshots/screenshots/Nginx%20to%20app%201%20and%202.png)
+
