@@ -117,8 +117,8 @@ The project was validated using Ansible, Ansible Lint, and GitHub Actions.
 
 ### Screenshots
 
-#### 1. Project Overview
-![Project overview](screenshots/screenshots/project%201.png)
+#### 1. GitHub Actions CI Pipeline — Successful Run
+![GitHub Actions CI pipeline passed](screenshots/screenshots/project%201.png)
 
 #### 2. Ansible Lint
 ![Ansible Lint](screenshots/screenshots/02-ansible-lint-success.png)
